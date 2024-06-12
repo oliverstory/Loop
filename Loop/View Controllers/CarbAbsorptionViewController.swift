@@ -163,7 +163,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                     switch result {
                     case .success(let status):
                         carbStatuses = status
-                        carbsOnBoard = status.getClampedCarbsOnBoard()
+                        carbsOnBoard = state.carbsOnBoard?
                     case .failure(let error):
                         self.log.error("CarbStore failed to get carbStatus: %{public}@", String(describing: error))
                         retryContext.update(with: .carbs)
