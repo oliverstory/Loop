@@ -139,7 +139,11 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         charts.updateEndDate(chartStartDate.addingTimeInterval(.hours(totalHours+1))) // When there is no data, this allows presenting current hour + 1
 
         let midnight = Calendar.current.startOfDay(for: Date())
-        let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -deviceManager.carbStore.maximumAbsorptionTimeInterval))
+        // Limit carb entries when Insulin Counteraction Effects can be calculated based on cached doses - i.e. 24 hours minus duration of insulin action
+        let earliestCachedICE = Date(timeIntervalSinceNow: -(Bundle.main.localCacheDuration - deviceManager.doseStore.longestEffectDuration))
+        // In case more than one day of insulin is cached in future, make sure we don't go more than 1 day back. In practice should be no more than 18 hours.
+        let boundOnCarbList = max(Date(timeIntervalSinceNow: -1.day), earliestCachedICE)
+        let listStart = min(boundOnCarbList, midnight, chartStartDate, Date(timeIntervalSinceNow: -deviceManager.carbStore.maximumAbsorptionTimeInterval))
 
         let reloadGroup = DispatchGroup()
         let shouldUpdateGlucose = currentContext.contains(.glucose)
@@ -343,7 +347,12 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             }
 
             // Entry time
-            let startTime = timeFormatter.string(from: status.entry.startDate)
+            var startTime = timeFormatter.string(from: status.entry.startDate)
+            // Indicate if an entry is from the previous day to avoid potential confusion with future entries
+            // TODO: use dateFormatter.doesRelativeDateFormatting = true to make this localisable
+            if status.entry.startDate < midnight {
+                startTime = "Yesterday " + startTime
+            }
             if  let absorptionTime = status.entry.absorptionTime,
                 let duration = absorptionFormatter.string(from: absorptionTime)
             {
