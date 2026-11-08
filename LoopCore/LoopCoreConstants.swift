@@ -21,7 +21,7 @@ public enum LoopCoreConstants {
     /// The longest a carb entry can take to absorb; matches LoopAlgorithm's limit
     public static let maximumCarbAbsorptionTimeInterval = TimeInterval(hours: 10)
 
-    public static let defaultCarbAbsorptionTimes: DefaultAbsorptionTimes = (fast: .minutes(30), medium: .hours(3), slow: .hours(5))
+    public static let defaultCarbAbsorptionTimes: DefaultAbsorptionTimes = (fast: .hours(2), medium: .hours(3), slow: .hours(5))
 
     /// How much historical glucose to include in a dosing decision
     /// Somewhat arbitrary, but typical maximum visible in bolus glucose preview
